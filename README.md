@@ -13,6 +13,10 @@ Summarize the results with a written report
 [jittered_center_camera]: ./images/jittered_center_camera.png
 [car_driving]: ./images/car_driving.png
 [3cameras]: ./images/3cameras.png
+[data1]: ./images/data1.jpg
+[data2]: ./images/data2.jpg
+[data3]: ./images/data3.jpg
+
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -84,9 +88,14 @@ The model used an adam optimizer, so the learning rate was not tuned manually.
 
 #### 4. Training Data and process
 
-Here are some visualisation of the training data:
-![car_driving][car_driving]
+#### Here are some examples of the raw training data:
 
+![data1][data1]
+![data2][data2]
+![data3][data3]
+
+
+#### Finally processed and cropped training data from all three cameras along with steering angle. 
 ![3cameras][3cameras]
 
 
@@ -142,4 +151,7 @@ The model trained (which is saved), is used again in testing. The simulator feed
 steering_angle = float(model.predict(transformed_image_array, batch_size=1))
 throttle = 0.35
 ```
+### Screenshot of car driving itself using the trained model
+![car_driving][car_driving]
+
 References: All ideas are heavily taken from discussions on udacity Self driving car nanodegree cohort facebook community.
