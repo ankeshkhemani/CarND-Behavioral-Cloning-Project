@@ -8,7 +8,11 @@ Train and validate the model with a training and validation set
 Test that the model successfully drives around track one without leaving the road
 Summarize the results with a written report
 
-
+[model]: ./model.png
+[steering_histogram]: ./steering_histogram.png
+[jittered_center_camera]: ./jittered_center_camera.png
+[car_driving]: ./car_driving.png
+[3cameras]: ./3cameras.png
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -151,8 +155,7 @@ dropout was set aggressively on each layer at .25 to avoid overtraining
 **Layer Fully Connected** with 1 output value for the steering angle.
 
 ### Visualisation
-[Keras output plot](./model.png)
-
+![Model][model]
 ## Data preprocessing and Augmentation
 The simulator captures data into a csv log file which references left, centre and right captured images within a sub directory. Telemetry data for steering, throttle, brake and speed is also contained in the log. Only steering was used in this project.
 
@@ -161,7 +164,7 @@ Before being fed into the model, the images are cropped to 66x200 starting at he
 
 
 As seen in the following histogram a significant proportion of the data is for driving straight and its lopsided to left turns (being a negative steering angle is left) when using data generated following my conservative driving laps.
-![Steering Angle Histogram](https://raw.githubusercontent.com/hortovanyi/udacity-behavioral-cloning-project/master/images/steering_histogram.png)
+![steering_histogram][steering_histogram]
 
 The log file was preprocessed to remove contiguous rows with a history of >5 records, with a 0.0 steering angle. This was the only preprocessing done outside of the batch generators used in training (random rows are augmented/jittered for each batch at model training time).
 
