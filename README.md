@@ -8,11 +8,11 @@ Train and validate the model with a training and validation set
 Test that the model successfully drives around track one without leaving the road
 Summarize the results with a written report
 
-[model]: ./model.png
-[steering_histogram]: ./steering_histogram.png
-[jittered_center_camera]: ./jittered_center_camera.png
-[car_driving]: ./car_driving.png
-[3cameras]: ./3cameras.png
+[model]: ./images/model.png
+[steering_histogram]: ./images/steering_histogram.png
+[jittered_center_camera]: ./images/jittered_center_camera.png
+[car_driving]: ./images/car_driving.png
+[3cameras]: ./images/3cameras.png
 
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -92,7 +92,7 @@ Here is a visualization of the architecture (note: visualizing the architecture 
 
 #### 3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+To capture good driving behavior, I first recorded two laps on track 1 using center lane driving. Here is an example image of center lane driving:
 
 ![alt text][image2]
 
