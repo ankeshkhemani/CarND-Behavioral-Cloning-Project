@@ -94,12 +94,11 @@ Data was captured from the simulator. I drove conservatively around the track th
 
 
 The Adam Optimizer was used with a mean squared error loss. A number of hyper-parameters were passed on the command line. The command I used looks such for a batch size of 500, 10 epochs (dropped out early if loss wasn't improving), dropout at .25 with a training size of 50000 randomly augmented features with adjusted labels and 2000 random features & labels used for validation
-
+The reason for choosing Adam optimizer is that it works well with sparse data, it adds bias correction and momentum. One can refer to the following article. http://sebastianruder.com/optimizing-gradient-descent/index.html#adam
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road.
 I  randomly shuffled the data set and put 20% of the data into a validation set. 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
-I used a standard adam optimizer without any custom parameters.
 The simulator captures data into a csv log file which references left, centre and right captured images within a sub directory. Telemetry data for steering, throttle, brake and speed is also contained in the log. Only steering was used in this project.
 Before being fed into the model, the images are cropped to 66x200 starting at height 60 with width centered -
 
