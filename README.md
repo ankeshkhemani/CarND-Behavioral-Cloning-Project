@@ -143,3 +143,4 @@ The model trained (which is saved), is used again in testing. The simulator feed
 steering_angle = float(model.predict(transformed_image_array, batch_size=1))
 throttle = 0.35
 ```
+References: All ideas are heavily taken from discussions on udacity Self driving car nanodegree cohort facebook community.
