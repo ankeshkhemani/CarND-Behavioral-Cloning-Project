@@ -6,7 +6,6 @@ import numpy as np
 import socketio
 import eventlet
 import eventlet.wsgi
-import time
 import cv2
 from PIL import Image
 from PIL import ImageOps
@@ -26,73 +25,72 @@ app = Flask(__name__)
 model = None
 prev_image_array = None
 
-
 def crop_camera(img, crop_height=66, crop_width=200):
-    height = img.shape[0]
-    width = img.shape[1]
+        height = img.shape[0]
+        width = img.shape[1]
 
-    y_start = 60
-    x_start = int(width/2)-int(crop_width/2)
+        y_start = 60
+        x_start = int(width/2)-int(crop_width/2)
 
-    return img[y_start:y_start+crop_height, x_start:x_start+crop_width]
+        return img[y_start:y_start+crop_height, x_start:x_start+crop_width]
 
 
 @sio.on('telemetry')
 def telemetry(sid, data):
-    # The current steering angle of the car
-    steering_angle = data["steering_angle"]
-    # The current throttle of the car
-    throttle = data["throttle"]
-    # The current speed of the car
-    speed = data["speed"]
-    # The current image from the center camera of the car
-    imgString = data["image"]
-    image = Image.open(BytesIO(base64.b64decode(imgString)))
-    image_array = np.asarray(image)
-    # image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2YUV)
-    image_array = crop_camera(image_array)
-    transformed_image_array = image_array[None, :, :, :]
+        # The current steering angle of the car
+        steering_angle = data["steering_angle"]
+        # The current throttle of the car
+        throttle = data["throttle"]
+        # The current speed of the car
+        speed = data["speed"]
+        # The current image from the center camera of the car
+        imgString = data["image"]
+        image = Image.open(BytesIO(base64.b64decode(imgString)))
+        image_array = np.asarray(image)
+        # image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2YUV)
+        image_array = crop_camera(image_array)
+        transformed_image_array = image_array[None, :, :, :]
 
-    steering_angle = float(model.predict(transformed_image_array, batch_size=1))
-    # The driving model currently just outputs a constant throttle. Feel free to edit this.
-    throttle = 0.35
-    print(steering_angle, throttle)
-    send_control(steering_angle, throttle)
+        steering_angle = float(model.predict(transformed_image_array, batch_size=1))
+        # The driving model currently just outputs a constant throttle. Feel free to edit this.
+        throttle = 0.35
+        print(steering_angle, throttle)
+        send_control(steering_angle, throttle)
 
 
 @sio.on('connect')
 def connect(sid, environ):
-    print("connect ", sid)
-    send_control(0, 0)
+        print("connect ", sid)
+        send_control(0, 0)
 
 
 def send_control(steering_angle, throttle):
-    sio.emit("steer", data={
-    'steering_angle': steering_angle.__str__(),
-    'throttle': throttle.__str__()
-    }, skip_sid=True)
+        sio.emit("steer", data={
+        'steering_angle': steering_angle.__str__(),
+        'throttle': throttle.__str__()
+        }, skip_sid=True)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Remote Driving')
-    parser.add_argument('model', type=str,
-    help='Path to model definition json. Model weights should be on the same path.')
-    args = parser.parse_args()
-    with open(args.model, 'r') as jfile:
-        # NOTE: if you saved the file by calling json.dump(model.to_json(), ...)
-        # then you will have to call:
-        #
-        #   model = model_from_json(json.loads(jfile.read()))\
-        #
-        # instead.
-        model = model_from_json(json.loads(jfile.read()))
+        parser = argparse.ArgumentParser(description='Remote Driving')
+        parser.add_argument('model', type=str,
+        help='Path to model definition json. Model weights should be on the same path.')
+        args = parser.parse_args()
+        with open(args.model, 'r') as jfile:
+                # NOTE: if you saved the file by calling json.dump(model.to_json(), ...)
+                # then you will have to call:
+                #
+                #   model = model_from_json(json.loads(jfile.read()))\
+                #
+                # instead.
+                model = model_from_json(json.loads(jfile.read()))
 
-    model.compile("adam", "mse")
-    weights_file = args.model.replace('json', 'h5')
-    model.load_weights(weights_file)
+        model.compile("adam", "mse")
+        weights_file = args.model.replace('json', 'h5')
+        model.load_weights(weights_file)
 
-    # wrap Flask application with engineio's middleware
-    app = socketio.Middleware(sio, app)
+        # wrap Flask application with engineio's middleware
+        app = socketio.Middleware(sio, app)
 
-    # deploy as an eventlet WSGI server
-    eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
+        # deploy as an eventlet WSGI server
+        eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
