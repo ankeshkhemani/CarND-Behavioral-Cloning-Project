@@ -128,52 +128,49 @@ def jitter_camera_image(row, log_path, cameras):
 
 
 # create a training data generator for keras fit_model
+def load_data(log_path='./data', log_file='driving_log.csv', skiprows=1, filter_straights=False):
+    column_names = ['center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed']
+    data_df = pd.read_csv(log_path+'/'+log_file, names=column_names, skiprows=skiprows)
+
+    if filter_straights:
+        data_df = filter_driving_straight(data_df)
+
+    return data_df
+
+
+def process_image(row, log_path, cameras, crop_image):
+    image, steering = jitter_camera_image(row, log_path, cameras)
+
+    if random.random() >= .5 and abs(steering) > 0.1:
+        image = cv2.flip(image, 1)
+        steering = -steering
+
+    if crop_image:
+        image = crop_camera(image)
+
+    return image, steering
+
+
 def gen_train_data(log_path='./data', log_file='driving_log.csv', skiprows=1,
                    cameras=cameras, filter_straights=False,
                    crop_image=True, batch_size=128):
 
-    # load the csv log file
-    print("Cameras: ", cameras)
-    print("Log path: ", log_path)
-    print("Log file: ", log_file)
-
-    column_names = ['center', 'left', 'right',
-                    'steering', 'throttle', 'brake', 'speed']
-    data_df = pd.read_csv(log_path+'/'+log_file,
-                          names=column_names, skiprows=skiprows)
-
-    # filter out straight line stretches
-    if filter_straights:
-        data_df = filter_driving_straight(data_df)
-
+    data_df = load_data(log_path, log_file, skiprows, filter_straights)
     data_count = len(data_df)
 
-    print("Log with %d rows." % (len(data_df)))
+    print(f"Log with {data_count} rows.")
 
-    while True:  # need to keep generating data
-
-        # initialise data extract
+    while True:
         features = []
         labels = []
 
-        # create a random batch to return
         while len(features) < batch_size:
             row = data_df.iloc[np.random.randint(data_count-1)]
-
-            image, steering = jitter_camera_image(row, log_path, cameras)
-
-            # flip 50% randomily that are not driving straight
-            if random.random() >= .5 and abs(steering) > 0.1:
-                image = cv2.flip(image, 1)
-                steering = -steering
-
-            if crop_image:
-                image = crop_camera(image)
+            image, steering = process_image(row, log_path, cameras, crop_image)
 
             features.append(image)
             labels.append(steering)
 
-        # yield the batch
         yield (np.array(features), np.array(labels))
 
 
