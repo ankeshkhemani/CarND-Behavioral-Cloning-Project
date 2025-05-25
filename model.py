@@ -132,7 +132,6 @@ def gen_train_data(log_path='./data', log_file='driving_log.csv', skiprows=1,
                    cameras=cameras, filter_straights=False,
                    crop_image=True, batch_size=128):
 
-    # load the csv log file
     print("Cameras: ", cameras)
     print("Log path: ", log_path)
     print("Log file: ", log_file)
@@ -142,39 +141,37 @@ def gen_train_data(log_path='./data', log_file='driving_log.csv', skiprows=1,
     data_df = pd.read_csv(log_path+'/'+log_file,
                           names=column_names, skiprows=skiprows)
 
-    # filter out straight line stretches
     if filter_straights:
         data_df = filter_driving_straight(data_df)
 
     data_count = len(data_df)
+    print("Log with %d rows." % (data_count))
 
-    print("Log with %d rows." % (len(data_df)))
+    while True:  
+        yield batch_generator(data_df, log_path, cameras, crop_image, batch_size)
 
-    while True:  # need to keep generating data
+def batch_generator(data_df, log_path, cameras, crop_image, batch_size):
+    features = []
+    labels = []
+    data_count = len(data_df)
+    
+    while len(features) < batch_size:
+        row = data_df.iloc[np.random.randint(data_count-1)]
+        image, steering = jitter_camera_image(row, log_path, cameras)
+        image, steering = flip_image(image, steering)
+        if crop_image:
+            image = crop_camera(image)
 
-        # initialise data extract
-        features = []
-        labels = []
+        features.append(image)
+        labels.append(steering)
+    
+    return np.array(features), np.array(labels)
 
-        # create a random batch to return
-        while len(features) < batch_size:
-            row = data_df.iloc[np.random.randint(data_count-1)]
-
-            image, steering = jitter_camera_image(row, log_path, cameras)
-
-            # flip 50% randomily that are not driving straight
-            if random.random() >= .5 and abs(steering) > 0.1:
-                image = cv2.flip(image, 1)
-                steering = -steering
-
-            if crop_image:
-                image = crop_camera(image)
-
-            features.append(image)
-            labels.append(steering)
-
-        # yield the batch
-        yield (np.array(features), np.array(labels))
+def flip_image(image, steering):
+    if random.random() >= .5 and abs(steering) > 0.1:
+        image = cv2.flip(image, 1)
+        steering = -steering
+    return image, steering
 
 
 # create a valdiation data generator for keras fit_model
